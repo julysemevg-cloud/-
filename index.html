@@ -7,30 +7,44 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;padding:32px 16px 60px;color:#1a1a1a}
-.wrap{max-width:480px;margin:0 auto}
+.wrap{max-width:640px;margin:0 auto}
 .hdr{text-align:center;margin-bottom:32px}
 .hdr-logo{width:64px;height:64px;background:linear-gradient(135deg,#FF9800,#F57C00);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 14px}
 .hdr h1{font-size:22px;font-weight:700;color:#1a1a1a;margin-bottom:6px}
 .hdr p{font-size:14px;color:#888}
-.grid{display:flex;flex-direction:column;gap:12px}
+
 .section-block{margin-bottom:28px}
 .section-block:last-child{margin-bottom:0}
 .section-title{font-size:13px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.06em;margin:0 4px 12px}
-.tool-card{background:#fff;border:1px solid #e8e8e8;border-radius:16px;padding:18px 20px;text-decoration:none;color:inherit;display:flex;align-items:center;gap:16px;transition:transform 0.15s,box-shadow 0.15s}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.tool-card{
+  background:#fff;border:1px solid #e8e8e8;border-radius:16px;
+  padding:18px 16px;text-decoration:none;color:inherit;
+  display:flex;flex-direction:column;align-items:flex-start;gap:10px;
+  transition:transform 0.15s,box-shadow 0.15s;
+  min-height:128px;
+}
 .tool-card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,0.09)}
 .tool-card:active{transform:scale(0.99)}
-.tool-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.tool-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
 .icon-orange{background:#fff3e0}
 .icon-blue{background:#e3f2fd}
 .icon-green{background:#e8f5e9}
 .icon-red{background:#fce4ec}
 .icon-purple{background:#ede7f6}
 .icon-yellow{background:#fdf8df}
-.tool-info{flex:1}
-.tool-title{font-size:16px;font-weight:600;margin-bottom:4px}
-.tool-desc{font-size:13px;color:#999;line-height:1.4}
-.tool-arrow{color:#ccc;font-size:20px;flex-shrink:0}
+.tool-info{flex:1;width:100%}
+.tool-title{font-size:15px;font-weight:600;margin-bottom:4px;line-height:1.3}
+.tool-desc{font-size:12.5px;color:#999;line-height:1.4}
+
 .footer{text-align:center;margin-top:32px;font-size:12px;color:#bbb}
+
+@media (max-width: 380px){
+  .grid{grid-template-columns:1fr}
+  .tool-card{min-height:unset}
+}
 </style>
 </head>
 <body>
@@ -40,6 +54,7 @@ body{background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',
     <h1>Инструменты рассылки</h1>
     <p>Telegram-уведомления для команды</p>
   </div>
+
   <div class="section-block">
     <div class="section-title">Курсы</div>
     <div class="grid">
@@ -49,7 +64,6 @@ body{background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',
           <div class="tool-title">Курс ЦБ</div>
           <div class="tool-desc">Официальные курсы ЦБ на дату</div>
         </div>
-        <div class="tool-arrow">›</div>
       </a>
       <a class="tool-card" href="speckurs.html">
         <div class="tool-icon icon-green">💱</div>
@@ -57,7 +71,6 @@ body{background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',
           <div class="tool-title">Спецкурс</div>
           <div class="tool-desc">Рассылка курсов USD, EUR, CNY</div>
         </div>
-        <div class="tool-arrow">›</div>
       </a>
     </div>
   </div>
@@ -71,7 +84,6 @@ body{background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',
           <div class="tool-title">Созвон 10:00</div>
           <div class="tool-desc">Напоминание о срочных платежах</div>
         </div>
-        <div class="tool-arrow">›</div>
       </a>
       <a class="tool-card" href="morning_broadcast.html">
         <div class="tool-icon icon-purple">🌅</div>
@@ -79,7 +91,6 @@ body{background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',
           <div class="tool-title">Утренняя рассылка</div>
           <div class="tool-desc">Финансовый чек-лист и рабочие столы</div>
         </div>
-        <div class="tool-arrow">›</div>
       </a>
       <a class="tool-card" href="gdyn.html">
         <div class="tool-icon icon-blue">⏳</div>
@@ -87,7 +98,6 @@ body{background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',
           <div class="tool-title">Ждунчики 14:00</div>
           <div class="tool-desc">Рассылка напоминания в 14:00</div>
         </div>
-        <div class="tool-arrow">›</div>
       </a>
       <a class="tool-card" href="ostatki.html">
         <div class="tool-icon icon-orange">💰</div>
@@ -95,7 +105,6 @@ body{background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',
           <div class="tool-title">Остатки по счетам</div>
           <div class="tool-desc">Рассылка остатков на дату</div>
         </div>
-        <div class="tool-arrow">›</div>
       </a>
       <a class="tool-card" href="kosh.html">
         <div class="tool-icon icon-green">🔎</div>
@@ -103,7 +112,6 @@ body{background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',
           <div class="tool-title">Проверка КОШ</div>
           <div class="tool-desc">Рассылка значения КОШ с комментарием</div>
         </div>
-        <div class="tool-arrow">›</div>
       </a>
       <a class="tool-card" href="instruktsiya_zapfix.html">
         <div class="tool-icon icon-yellow">📘</div>
@@ -111,10 +119,10 @@ body{background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',
           <div class="tool-title">ЗАП+ФИКС — инструкция</div>
           <div class="tool-desc">Полное руководство по листу ЗАП+ФИКС</div>
         </div>
-        <div class="tool-arrow">›</div>
       </a>
     </div>
   </div>
+
   <div class="footer">julysemevg-cloud · GitHub Pages</div>
 </div>
 </body>
