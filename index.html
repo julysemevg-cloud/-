@@ -13,6 +13,9 @@ body{background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',
 .hdr h1{font-size:22px;font-weight:700;color:#1a1a1a;margin-bottom:6px}
 .hdr p{font-size:14px;color:#888}
 .grid{display:flex;flex-direction:column;gap:12px}
+.section-block{margin-bottom:28px}
+.section-block:last-child{margin-bottom:0}
+.section-title{font-size:13px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.06em;margin:0 4px 12px}
 .tool-card{background:#fff;border:1px solid #e8e8e8;border-radius:16px;padding:18px 20px;text-decoration:none;color:inherit;display:flex;align-items:center;gap:16px;transition:transform 0.15s,box-shadow 0.15s}
 .tool-card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,0.09)}
 .tool-card:active{transform:scale(0.99)}
@@ -37,55 +40,64 @@ body{background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',
     <h1>Инструменты рассылки</h1>
     <p>Telegram-уведомления для команды</p>
   </div>
-  <div class="grid">
-    <a class="tool-card" href="sozvon.html">
-      <div class="tool-icon icon-orange">📞</div>
-      <div class="tool-info">
-        <div class="tool-title">Созвон 10:00</div>
-        <div class="tool-desc">Напоминание о срочных платежах</div>
-      </div>
-      <div class="tool-arrow">›</div>
-    </a>
-    <a class="tool-card" href="morning_broadcast.html">
-      <div class="tool-icon icon-purple">🌅</div>
-      <div class="tool-info">
-        <div class="tool-title">Утренняя рассылка</div>
-        <div class="tool-desc">Финансовый чек-лист и рабочие столы</div>
-      </div>
-      <div class="tool-arrow">›</div>
-    </a>
-    <a class="tool-card" href="speckurs.html">
-      <div class="tool-icon icon-green">💱</div>
-      <div class="tool-info">
-        <div class="tool-title">Спецкурс</div>
-        <div class="tool-desc">Рассылка курсов USD, EUR, CNY</div>
-      </div>
-      <div class="tool-arrow">›</div>
-    </a>
-    <a class="tool-card" href="kurscb.html">
-      <div class="tool-icon icon-red">🏦</div>
-      <div class="tool-info">
-        <div class="tool-title">Курс ЦБ</div>
-        <div class="tool-desc">Официальные курсы ЦБ на дату</div>
-      </div>
-      <div class="tool-arrow">›</div>
-    </a>
-    <a class="tool-card" href="gdyn.html">
-      <div class="tool-icon icon-blue">⏳</div>
-      <div class="tool-info">
-        <div class="tool-title">Ждунчики 14:00</div>
-        <div class="tool-desc">Рассылка напоминания в 14:00</div>
-      </div>
-      <div class="tool-arrow">›</div>
-    </a>
-    <a class="tool-card" href="instruktsiya_zapfix.html">
-      <div class="tool-icon icon-yellow">📘</div>
-      <div class="tool-info">
-        <div class="tool-title">ЗАП+ФИКС — инструкция</div>
-        <div class="tool-desc">Полное руководство по листу ЗАП+ФИКС</div>
-      </div>
-      <div class="tool-arrow">›</div>
-    </a>
+  <div class="section-block">
+    <div class="section-title">Курсы</div>
+    <div class="grid">
+      <a class="tool-card" href="kurscb.html">
+        <div class="tool-icon icon-red">🏦</div>
+        <div class="tool-info">
+          <div class="tool-title">Курс ЦБ</div>
+          <div class="tool-desc">Официальные курсы ЦБ на дату</div>
+        </div>
+        <div class="tool-arrow">›</div>
+      </a>
+      <a class="tool-card" href="speckurs.html">
+        <div class="tool-icon icon-green">💱</div>
+        <div class="tool-info">
+          <div class="tool-title">Спецкурс</div>
+          <div class="tool-desc">Рассылка курсов USD, EUR, CNY</div>
+        </div>
+        <div class="tool-arrow">›</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section-block">
+    <div class="section-title">Финансовый отдел</div>
+    <div class="grid">
+      <a class="tool-card" href="sozvon.html">
+        <div class="tool-icon icon-orange">📞</div>
+        <div class="tool-info">
+          <div class="tool-title">Созвон 10:00</div>
+          <div class="tool-desc">Напоминание о срочных платежах</div>
+        </div>
+        <div class="tool-arrow">›</div>
+      </a>
+      <a class="tool-card" href="morning_broadcast.html">
+        <div class="tool-icon icon-purple">🌅</div>
+        <div class="tool-info">
+          <div class="tool-title">Утренняя рассылка</div>
+          <div class="tool-desc">Финансовый чек-лист и рабочие столы</div>
+        </div>
+        <div class="tool-arrow">›</div>
+      </a>
+      <a class="tool-card" href="gdyn.html">
+        <div class="tool-icon icon-blue">⏳</div>
+        <div class="tool-info">
+          <div class="tool-title">Ждунчики 14:00</div>
+          <div class="tool-desc">Рассылка напоминания в 14:00</div>
+        </div>
+        <div class="tool-arrow">›</div>
+      </a>
+      <a class="tool-card" href="instruktsiya_zapfix.html">
+        <div class="tool-icon icon-yellow">📘</div>
+        <div class="tool-info">
+          <div class="tool-title">ЗАП+ФИКС — инструкция</div>
+          <div class="tool-desc">Полное руководство по листу ЗАП+ФИКС</div>
+        </div>
+        <div class="tool-arrow">›</div>
+      </a>
+    </div>
   </div>
   <div class="footer">julysemevg-cloud · GitHub Pages</div>
 </div>
