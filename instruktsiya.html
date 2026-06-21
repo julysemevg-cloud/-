@@ -1,116 +1,201 @@
-"""
-Отправка финансовой рассылки в Telegram через Bot API.
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Инструкция пользователя — Спринтум</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --card-bg: #ffffff;
+    --text-main: #1a1a1a;
+    --text-muted: #5f6368;
+    --accent: #2f6fed;
+    --accent-light: #eaf1ff;
+    --border: #e3e6ea;
+    --warn-bg: #fff4e5;
+    --warn-border: #f0b35c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-main);
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 20px 64px;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  header h1 {
+    font-size: 26px;
+    margin: 0 0 8px;
+  }
+  header p {
+    color: var(--text-muted);
+    margin: 0;
+    font-size: 15px;
+  }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px 26px;
+    margin-bottom: 20px;
+  }
+  .card h2 {
+    font-size: 19px;
+    margin: 0 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card h2 .emoji {
+    font-size: 22px;
+  }
+  .card p {
+    margin: 0 0 12px;
+    font-size: 15px;
+  }
+  .card ol, .card ul {
+    margin: 0 0 12px;
+    padding-left: 22px;
+    font-size: 15px;
+  }
+  .card li {
+    margin-bottom: 8px;
+  }
+  .card li:last-child {
+    margin-bottom: 0;
+  }
+  .btn-link {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff !important;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .btn-link:hover {
+    opacity: 0.88;
+  }
+  .deadline {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+  .deadline b {
+    color: #b5650a;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin-top: 8px;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .pill {
+    display: inline-block;
+    background: var(--accent-light);
+    color: var(--accent);
+    border-radius: 6px;
+    padding: 2px 10px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-top: 36px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
 
-Установка зависимостей:
-    pip install requests --break-system-packages
+  <header>
+    <h1>📖 Инструкция пользователя</h1>
+    <p>Команда Спринтум · финансовый отдел</p>
+  </header>
 
-Запуск:
-    python3 send_telegram_broadcast.py
+  <div class="card">
+    <h2><span class="emoji">⏰</span> Регламент до 10:00</h2>
+    <div class="deadline">
+      Каждое утро до <b>10:00</b> необходимо подготовить и предоставить информацию по <b>строчным платежам</b> за прошедший рабочий день.
+    </div>
+    <ol>
+      <li>Проверьте операции в своём «рабочем столе» (ссылка ниже в разделе 3).</li>
+      <li>Сверьте суммы и статусы платежей.</li>
+      <li>Сообщите итоговую информацию ответственному в общем чате до наступления дедлайна.</li>
+    </ol>
+  </div>
 
-ВАЖНО (безопасность):
-- Токен бота — секретный ключ. Никому не передавайте, не публикуйте в чатах/репозиториях.
-- Если токен ниже когда-либо "засветился" в переписке или публичном месте —
-  перевыпустите его через @BotFather: /mybots -> выбрать бота -> Bot Settings ->
-  API Token -> Revoke current token, и впишите новый сюда.
-"""
+  <div class="card">
+    <h2><span class="emoji">💵</span> Работа с формами «Ставим в оплату» / «Возврат»</h2>
+    <p><span class="pill">Ставим в оплату</span> — используйте, когда нужно инициировать новый платёж.</p>
+    <ol>
+      <li>Откройте форму по ссылке из рассылки в Telegram.</li>
+      <li>Заполните все обязательные поля: сумма, получатель, основание платежа.</li>
+      <li>Проверьте корректность реквизитов перед отправкой — после отправки форма не редактируется.</li>
+      <li>Нажмите «Отправить» — заявка автоматически попадает в обработку.</li>
+    </ol>
+    <p><span class="pill">Возврат</span> — используйте при необходимости вернуть средства.</p>
+    <ol>
+      <li>Откройте форму «Возврат» по ссылке из рассылки.</li>
+      <li>Укажите номер исходного платежа и причину возврата.</li>
+      <li>Отправьте форму — обработка занимает до 1 рабочего дня.</li>
+    </ol>
+  </div>
 
-import requests
+  <div class="card">
+    <h2><span class="emoji">🖥️</span> Работа с «рабочими столами» операциониста</h2>
+    <p>У каждого сотрудника есть свой именной «рабочий стол» — Google-таблица с операциями, которые нужно обработать.</p>
+    <ol>
+      <li>Найдите свою фамилию в разделе «Рабочий стол операциониста» в утренней рассылке.</li>
+      <li>Перейдите по ссылке «рабочий стол» рядом со своим именем.</li>
+      <li>Обновляйте статусы операций по мере обработки (в соответствующей колонке таблицы).</li>
+      <li>Не редактируйте данные в строках других сотрудников.</li>
+    </ol>
+    <table>
+      <tr><th>Действие</th><th>Когда выполнять</th></tr>
+      <tr><td>Проверка новых операций</td><td>В начале дня</td></tr>
+      <tr><td>Обновление статусов</td><td>В течение дня, по факту обработки</td></tr>
+      <tr><td>Итоговая сверка</td><td>До 10:00 следующего дня</td></tr>
+    </table>
+  </div>
 
-# ============== CONFIG ==============
-BOT_TOKEN = "8662623590:AAFnr_Mw01my43MNE3SoCgah0MZ4orMEa2Y"  # @FinRassilka_bot
+  <div class="card">
+    <h2><span class="emoji">❓</span> Если что-то не работает</h2>
+    <p>Если форма не открывается, таблица недоступна, или возникли вопросы по заполнению — напишите в общий чат команды, не дожидаясь дедлайна.</p>
+  </div>
 
-CHAT_ID = "-1002460716147"     # ID супергруппы
-MESSAGE_THREAD_ID = 2          # номер топика (треда) внутри группы
+  <footer>
+    ✨ Команда проекта Спринтум ✨
+  </footer>
 
-# Переменные поля рассылки
-ДАТА_ВРЕМЯ = "22 июня 2026, 10:00 (МСК)"
-
-# Ссылки "Быстрый доступ"
-LINK_OPLATA = "https://docs.google.com/forms/d/e/1FAIpQLSeK0dtzYWukAtl_K6TNzVSOiQVW9g3B6Ju7pffGVew7lLji8A/viewform"
-LINK_VOZVRAT = "https://docs.google.com/forms/d/e/1FAIpQLSdpd4tRlPq3I9BbjFQoWUXazNYhutc5RdllrupGBuDifcI6ww/viewform"
-
-# Ссылка на инструкцию пользователя
-LINK_INSTRUKCIA = "https://example.com/instruktsiya"  # ЗАМЕНИТЕ на реальную ссылку
-
-# Рабочие столы операционистов: (Имя, ссылка)
-DESKTOPS = [
-    ("Anya", "https://docs.google.com/spreadsheets/d/1oqFj6tSyrjpDSowKQb5EetQlBePoCpixRV58kmoWVGw/edit?gid=1306928151#gid=1306928151"),
-    ("Arisa Livland", "https://docs.google.com/spreadsheets/d/1o0B11cPcISliot2pV4hTEIDl7KRZl9B_i815SU9MLO8"),
-    ("Erwin K", "https://docs.google.com/spreadsheets/d/1K00rRmIsPpsFJaR7Re8f9jlBXqIYBJkIavWNiFJF4xQ"),
-    ("Eva", "https://docs.google.com/spreadsheets/d/1U4AqahpXhaiiN3ZeicWhUfKBhRtsRnXffjN_p-d1d2M"),
-    ("Faina", "https://docs.google.com/spreadsheets/d/1AYfItnIpCIoNHfb3C2KEuORkKABF5A49qHIJYn32n7w"),
-    ("Gina Phillips", "https://docs.google.com/spreadsheets/d/1UIJHOGblDd0xLvw-5SHbFn9R4EUlQFFlI-d4ddq-C-g"),
-    ("Helena Rubinstein", "https://docs.google.com/spreadsheets/d/1N0vBVQ6sl-X66rv0a7pzg0mpCya1o7IPOnQAWIikh3s"),
-    ("Helga Borix", "https://docs.google.com/spreadsheets/d/1Vna2zUbuE8j2_dLzKLxJhjcRP_EJfEm2_LOyBpo2tzg"),
-    ("Jana Hunter", "https://docs.google.com/spreadsheets/d/1zoriY6ETKxOcGaXQwo3kIB7HmbDGERko_oez3_mDdaM"),
-    ("Julija Wahres Licht", "https://docs.google.com/spreadsheets/d/17fqdKI2m2HChS-gmGbK4G2WbWtyv2kvgt26NPbGf07Q"),
-    ("Juna Schmidt", "https://docs.google.com/spreadsheets/d/1bMUaHnxHl3C7WxQm-jFY95pl1cSqK8BuXal2Lh9TOow"),
-    ("Kelly McFog", "https://docs.google.com/spreadsheets/d/1OLbOjWpKdQrmke9dJ00IG-7JpIh1VGPHfk21qGr71-0"),
-    ("Margo Morisson", "https://docs.google.com/spreadsheets/d/1FZkPppfSMTTmcMEkRa_yM0eit-vi37KqdVU170OWS8Y"),
-    ("Nana Lenskaya", "https://docs.google.com/spreadsheets/d/1xHLvb-kMFb5KTLsbn-rpQhlX4vO9E6-qRDNqXErwN8w"),
-    ("Nila Bordo", "https://docs.google.com/spreadsheets/d/1EUFjPbk6vIW92OVBDXVYn9dvF_7u2P8YoaLrnQbf9D0"),
-]
-# ======================================
-
-
-def build_message() -> str:
-    """Собирает HTML-текст сообщения из шаблона и переменных."""
-
-    desktops_block = "\n".join(
-        f'👤 {name} — <a href="{url}">📊 рабочий стол</a>'
-        for name, url in DESKTOPS
-    )
-
-    separator = "▫️▫️▫️▫️▫️▫️▫️▫️▫️"
-
-    return f"""<b>📢 Доброе утро, лучшая команда Спринтум! 🎉</b>
-
-💰 Желаем плодотворного финансового дня!
-⏰ Подготовьте, пожалуйста, до <b>10:00</b> информацию по строчным платежам!
-
-{separator}
-
-<b>🚀 Быстрый доступ:</b>
-💵 Ставим в оплату → <a href="{LINK_OPLATA}">👉 Нажми сюда</a>
-↩️ Возврат → <a href="{LINK_VOZVRAT}">👉 Нажми сюда</a>
-
-{separator}
-
-<b>🖥️ Рабочий стол операциониста:</b>
-{desktops_block}
-
-{separator}
-
-📖 Инструкция пользователя → <a href="{LINK_INSTRUKCIA}">👉 Нажми сюда</a>
-
-<i>✨ С уважением, команда проекта ✨</i>"""
-
-
-def send_message(chat_id: str, text: str, message_thread_id: int = None) -> dict:
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    payload = {
-        "chat_id": chat_id,
-        "text": text,
-        "parse_mode": "HTML",
-        "disable_web_page_preview": True,
-    }
-    if message_thread_id is not None:
-        payload["message_thread_id"] = message_thread_id
-
-    response = requests.post(url, json=payload, timeout=10)
-    return response.json()
-
-
-def main():
-    text = build_message()
-    print(f"Длина сообщения: {len(text)} символов (лимит Telegram: 4096)\n")
-
-    result = send_message(CHAT_ID, text, MESSAGE_THREAD_ID)
-    if result.get("ok"):
-        print(f"[OK] Отправлено в группу {CHAT_ID}, топик {MESSAGE_THREAD_ID}")
-    else:
-        print(f"[ОШИБКА] {result}")
-
-
-if __name__ == "__main__":
-    main()
+</div>
+</body>
+</html>
