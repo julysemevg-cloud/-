@@ -1,0 +1,116 @@
+"""
+Отправка финансовой рассылки в Telegram через Bot API.
+
+Установка зависимостей:
+    pip install requests --break-system-packages
+
+Запуск:
+    python3 send_telegram_broadcast.py
+
+ВАЖНО (безопасность):
+- Токен бота — секретный ключ. Никому не передавайте, не публикуйте в чатах/репозиториях.
+- Если токен ниже когда-либо "засветился" в переписке или публичном месте —
+  перевыпустите его через @BotFather: /mybots -> выбрать бота -> Bot Settings ->
+  API Token -> Revoke current token, и впишите новый сюда.
+"""
+
+import requests
+
+# ============== CONFIG ==============
+BOT_TOKEN = "8662623590:AAFnr_Mw01my43MNE3SoCgah0MZ4orMEa2Y"  # @FinRassilka_bot
+
+CHAT_ID = "-1002460716147"     # ID супергруппы
+MESSAGE_THREAD_ID = 2          # номер топика (треда) внутри группы
+
+# Переменные поля рассылки
+ДАТА_ВРЕМЯ = "22 июня 2026, 10:00 (МСК)"
+
+# Ссылки "Быстрый доступ"
+LINK_OPLATA = "https://docs.google.com/forms/d/e/1FAIpQLSeK0dtzYWukAtl_K6TNzVSOiQVW9g3B6Ju7pffGVew7lLji8A/viewform"
+LINK_VOZVRAT = "https://docs.google.com/forms/d/e/1FAIpQLSdpd4tRlPq3I9BbjFQoWUXazNYhutc5RdllrupGBuDifcI6ww/viewform"
+
+# Ссылка на инструкцию пользователя
+LINK_INSTRUKCIA = "https://example.com/instruktsiya"  # ЗАМЕНИТЕ на реальную ссылку
+
+# Рабочие столы операционистов: (Имя, ссылка)
+DESKTOPS = [
+    ("Anya", "https://docs.google.com/spreadsheets/d/1oqFj6tSyrjpDSowKQb5EetQlBePoCpixRV58kmoWVGw/edit?gid=1306928151#gid=1306928151"),
+    ("Arisa Livland", "https://docs.google.com/spreadsheets/d/1o0B11cPcISliot2pV4hTEIDl7KRZl9B_i815SU9MLO8"),
+    ("Erwin K", "https://docs.google.com/spreadsheets/d/1K00rRmIsPpsFJaR7Re8f9jlBXqIYBJkIavWNiFJF4xQ"),
+    ("Eva", "https://docs.google.com/spreadsheets/d/1U4AqahpXhaiiN3ZeicWhUfKBhRtsRnXffjN_p-d1d2M"),
+    ("Faina", "https://docs.google.com/spreadsheets/d/1AYfItnIpCIoNHfb3C2KEuORkKABF5A49qHIJYn32n7w"),
+    ("Gina Phillips", "https://docs.google.com/spreadsheets/d/1UIJHOGblDd0xLvw-5SHbFn9R4EUlQFFlI-d4ddq-C-g"),
+    ("Helena Rubinstein", "https://docs.google.com/spreadsheets/d/1N0vBVQ6sl-X66rv0a7pzg0mpCya1o7IPOnQAWIikh3s"),
+    ("Helga Borix", "https://docs.google.com/spreadsheets/d/1Vna2zUbuE8j2_dLzKLxJhjcRP_EJfEm2_LOyBpo2tzg"),
+    ("Jana Hunter", "https://docs.google.com/spreadsheets/d/1zoriY6ETKxOcGaXQwo3kIB7HmbDGERko_oez3_mDdaM"),
+    ("Julija Wahres Licht", "https://docs.google.com/spreadsheets/d/17fqdKI2m2HChS-gmGbK4G2WbWtyv2kvgt26NPbGf07Q"),
+    ("Juna Schmidt", "https://docs.google.com/spreadsheets/d/1bMUaHnxHl3C7WxQm-jFY95pl1cSqK8BuXal2Lh9TOow"),
+    ("Kelly McFog", "https://docs.google.com/spreadsheets/d/1OLbOjWpKdQrmke9dJ00IG-7JpIh1VGPHfk21qGr71-0"),
+    ("Margo Morisson", "https://docs.google.com/spreadsheets/d/1FZkPppfSMTTmcMEkRa_yM0eit-vi37KqdVU170OWS8Y"),
+    ("Nana Lenskaya", "https://docs.google.com/spreadsheets/d/1xHLvb-kMFb5KTLsbn-rpQhlX4vO9E6-qRDNqXErwN8w"),
+    ("Nila Bordo", "https://docs.google.com/spreadsheets/d/1EUFjPbk6vIW92OVBDXVYn9dvF_7u2P8YoaLrnQbf9D0"),
+]
+# ======================================
+
+
+def build_message() -> str:
+    """Собирает HTML-текст сообщения из шаблона и переменных."""
+
+    desktops_block = "\n".join(
+        f'👤 {name} — <a href="{url}">📊 рабочий стол</a>'
+        for name, url in DESKTOPS
+    )
+
+    separator = "▫️▫️▫️▫️▫️▫️▫️▫️▫️"
+
+    return f"""<b>📢 Доброе утро, лучшая команда Спринтум! 🎉</b>
+
+💰 Желаем плодотворного финансового дня!
+⏰ Подготовьте, пожалуйста, до <b>10:00</b> информацию по строчным платежам!
+
+{separator}
+
+<b>🚀 Быстрый доступ:</b>
+💵 Ставим в оплату → <a href="{LINK_OPLATA}">👉 Нажми сюда</a>
+↩️ Возврат → <a href="{LINK_VOZVRAT}">👉 Нажми сюда</a>
+
+{separator}
+
+<b>🖥️ Рабочий стол операциониста:</b>
+{desktops_block}
+
+{separator}
+
+📖 Инструкция пользователя → <a href="{LINK_INSTRUKCIA}">👉 Нажми сюда</a>
+
+<i>✨ С уважением, команда проекта ✨</i>"""
+
+
+def send_message(chat_id: str, text: str, message_thread_id: int = None) -> dict:
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": "HTML",
+        "disable_web_page_preview": True,
+    }
+    if message_thread_id is not None:
+        payload["message_thread_id"] = message_thread_id
+
+    response = requests.post(url, json=payload, timeout=10)
+    return response.json()
+
+
+def main():
+    text = build_message()
+    print(f"Длина сообщения: {len(text)} символов (лимит Telegram: 4096)\n")
+
+    result = send_message(CHAT_ID, text, MESSAGE_THREAD_ID)
+    if result.get("ok"):
+        print(f"[OK] Отправлено в группу {CHAT_ID}, топик {MESSAGE_THREAD_ID}")
+    else:
+        print(f"[ОШИБКА] {result}")
+
+
+if __name__ == "__main__":
+    main()
