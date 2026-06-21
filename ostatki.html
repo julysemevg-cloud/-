@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Остатки по счетам</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f5f5;
+    --surface: #ffffff;
+    --border: #e0e0e0;
+    --text: #1a1a1a;
+    --text-muted: #666;
+    --blue: #2196F3;
+    --blue-light: #e3f2fd;
+    --blue-dark: #1565C0;
+    --green: #4CAF50;
+    --green-light: #e8f5e9;
+    --red: #f44336;
+    --red-light: #ffebee;
+    --amber-light: #fff3e0;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 16px 48px;
+  }
+
+  .app { width: 100%; max-width: 520px; }
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 0 2px;
+  }
+  .header-icon {
+    width: 44px; height: 44px;
+    background: var(--blue);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .header-title { font-size: 18px; font-weight: 600; line-height: 1.2; }
+  .header-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  .nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .nav-btn {
+    padding: 11px 0;
+    font-size: 14px;
+    font-weight: 500;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+  }
+  .nav-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .nav-btn.active {
+    background: var(--blue-light);
+    color: var(--blue-dark);
+    border-color: var(--blue);
+  }
+  .nav-btn:hover:not(.active) { background: #f0f0f0; color: var(--text); }
+
+  .section { display: none; }
+  .section.visible { display: block; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .field-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .field-label svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .date-input {
+    width: 100%; padding: 10px 13px; font-size: 14px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text);
+    outline: none; transition: border-color 0.15s;
+    font-family: inherit;
+  }
+  .date-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(33,150,243,0.12); }
+  .field-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.5; }
+
+  .img-drop {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-sm);
+    min-height: 140px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 8px; cursor: pointer;
+    color: var(--text-muted); font-size: 13px;
+    background: #fafafa;
+    position: relative; overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  .img-drop:hover { border-color: var(--blue); }
+  .img-drop.has-img { min-height: 180px; }
+  .img-drop img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: none;
+    border-radius: calc(var(--radius-sm) - 2px);
+  }
+  .img-drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .img-drop svg { width: 28px; height: 28px; stroke: #bbb; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .img-actions {
+    display: none;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .img-actions.visible { display: flex; }
+  .img-btn {
+    padding: 6px 14px; font-size: 13px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text-muted);
+    cursor: pointer;
+  }
+  .img-btn:hover { background: #f0f0f0; }
+  .img-btn.danger { color: var(--red); border-color: #ffcdd2; }
+  .img-btn.danger:hover { background: var(--red-light); }
+
+  .msg-box {
+    font-size: 14px; line-height: 1.7;
+    padding: 12px;
+    background: #fafafa;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    white-space: pre-wrap;
+  }
+
+  .tags-area {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px;
+    min-height: 44px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+    cursor: text;
+    background: var(--surface);
+    transition: border-color 0.15s;
+  }
+  .tags-area:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(33,150,243,0.12); }
+  .tag-chip {
+    display: flex; align-items: center; gap: 5px;
+    background: var(--blue-light); color: var(--blue-dark);
+    border-radius: 20px; padding: 3px 10px 3px 11px;
+    font-size: 13px; font-weight: 500;
+  }
+  .tag-chip button {
+    background: none; border: none; cursor: pointer;
+    color: #5c8cb8; font-size: 16px; line-height: 1;
+    padding: 0 0 0 2px; display: flex; align-items: center;
+  }
+  .tag-chip button:hover { color: var(--blue-dark); }
+  .tags-area input {
+    border: none; outline: none; font-size: 13px;
+    flex: 1; min-width: 100px; background: transparent;
+    color: var(--text); padding: 2px 4px;
+  }
+
+  .preview-wrap {
+    background: #e9f0f7;
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .preview-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--blue);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 15px;
+  }
+  .preview-bubble {
+    background: #fff;
+    border-radius: 2px 12px 12px 12px;
+    padding: 10px 13px;
+    font-size: 14px; line-height: 1.6;
+    color: #1a1a1a;
+    max-width: 320px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    white-space: pre-wrap;
+  }
+  .preview-bubble img {
+    width: 100%; border-radius: 8px;
+    margin-bottom: 8px; display: none;
+  }
+  .preview-time {
+    font-size: 11px; color: #888; text-align: right; margin-top: 4px;
+  }
+
+  .send-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 15px; font-weight: 600;
+    border: none; border-radius: var(--radius);
+    background: var(--blue); color: #fff;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background 0.15s, transform 0.1s;
+    margin-top: 4px;
+  }
+  .send-btn svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .send-btn:hover { background: var(--blue-dark); }
+  .send-btn:active { transform: scale(0.99); }
+  .send-btn:disabled { background: #90CAF9; cursor: not-allowed; transform: none; }
+
+  .status {
+    margin-top: 12px;
+    padding: 11px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    display: none;
+    align-items: flex-start; gap: 8px;
+  }
+  .status.visible { display: flex; }
+  .status.ok { background: var(--green-light); color: #2e7d32; border: 1px solid #c8e6c9; }
+  .status.err { background: var(--red-light); color: #c62828; border: 1px solid #ffcdd2; }
+  .status.info { background: var(--blue-light); color: var(--blue-dark); border: 1px solid #bbdefb; }
+  .status svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; margin-top: 1px; }
+
+  .settings-info {
+    font-size: 13px; color: var(--text-muted); line-height: 1.6;
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    background: var(--amber-light);
+    border-radius: var(--radius-sm);
+    border: 1px solid #ffe0b2;
+  }
+  .settings-info code { background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+  .field-group { margin-bottom: 14px; }
+  .field-group:last-child { margin-bottom: 0; }
+  .field-group label { display: block; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
+  .field-group input {
+    width: 100%; padding: 10px 13px; font-size: 14px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text);
+    outline: none; transition: border-color 0.15s;
+    font-family: inherit;
+  }
+  .field-group input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(33,150,243,0.12); }
+
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .token-row { display: flex; gap: 8px; }
+  .token-row input { flex: 1; }
+  .eye-btn {
+    width: 42px; flex-shrink: 0;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .eye-btn:hover { background: #f0f0f0; }
+  .eye-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .s-btn {
+    padding: 10px 18px; font-size: 14px; font-weight: 500;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text);
+    cursor: pointer; transition: background 0.15s;
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .s-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .s-btn:hover { background: #f0f0f0; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+  .saved-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--green-light); color: #2e7d32;
+    font-size: 12px; font-weight: 600;
+    padding: 3px 10px; border-radius: 20px;
+    border: 1px solid #c8e6c9;
+    margin-left: 10px;
+  }
+  .saved-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--green); display: block; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="header-icon">💰</div>
+    <div>
+      <div class="header-title">Остатки по счетам</div>
+      <div class="header-sub">Рассылка → Telegram</div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn active" id="btn-compose" onclick="switchTab('compose')">
+      <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Сформировать
+    </button>
+    <button class="nav-btn" id="btn-settings" onclick="switchTab('settings')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Настройки
+    </button>
+  </div>
+
+  <!-- COMPOSE -->
+  <div id="sec-compose" class="section visible">
+
+    <div class="card">
+      <div class="field-label">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Дата остатков
+      </div>
+      <input type="text" class="date-input" id="fDate" placeholder="21.06.2026" oninput="updatePreview()">
+      <div class="field-hint">Подставляется в текст вместо «на дату __.__.____»</div>
+    </div>
+
+    <div class="card">
+      <div class="field-label">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Картинка (скрин остатков)
+      </div>
+      <div class="img-drop" id="imgDrop" onclick="document.getElementById('imgFile').click()">
+        <img id="imgPreviewDrop" alt="превью">
+        <span id="imgPlaceholder" style="display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none">
+          <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+          Нажми, перетащи или вставь Ctrl+V
+        </span>
+        <input type="file" id="imgFile" accept="image/*" onchange="handleImg(this)">
+      </div>
+      <div class="img-actions" id="imgActions">
+        <button class="img-btn" onclick="document.getElementById('imgFile').click()">Заменить</button>
+        <button class="img-btn danger" onclick="removeImg()">Удалить</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="field-label">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Текст сообщения
+      </div>
+      <div class="msg-box" id="msgTextPreview"></div>
+    </div>
+
+    <div class="card">
+      <div class="field-label">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Теги участников (Enter или запятая)
+      </div>
+      <div class="tags-area" id="tagsWrap" onclick="document.getElementById('tagInput').focus()">
+        <input type="text" id="tagInput" placeholder="@ник" onkeydown="handleTagKey(event)" oninput="handleTagInput(event)">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="field-label">
+        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Превью
+      </div>
+      <div class="preview-wrap">
+        <div class="preview-avatar">🤖</div>
+        <div>
+          <div class="preview-bubble" id="previewBubble">
+            <img id="previewImg" alt="">
+            <span id="previewText"></span>
+          </div>
+          <div class="preview-time" id="previewTime"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Отправить в Telegram
+    </button>
+    <div class="status" id="statusBar">
+      <svg id="statusIcon" viewBox="0 0 24 24"></svg>
+      <span id="statusMsg"></span>
+    </div>
+
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="sec-settings" class="section">
+    <div class="card">
+      <div style="display:flex;align-items:center;margin-bottom:14px">
+        <span style="font-size:15px;font-weight:600">Telegram Bot</span>
+        <span class="saved-badge" id="savedBadge" style="display:none">сохранено в браузере</span>
+      </div>
+      <div class="settings-info">
+        Токен бота <b>не хранится в коде файла</b> — вводится здесь и сохраняется только в локальной памяти этого браузера (<code>localStorage</code>). Никому не передавайте этот файл с заполненными полями и не публикуйте его в репозитории.
+      </div>
+
+      <div class="field-group">
+        <label>Bot Token</label>
+        <div class="token-row">
+          <input type="password" id="botToken" placeholder="введите токен от @BotFather" oninput="saveSettings()">
+          <button class="eye-btn" onclick="toggleTokenVisibility()" title="Показать/скрыть">
+            <svg id="eyeIcon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="field-hint">Если токен где-то "засветился" — перевыпустите его через @BotFather: /mybots → Bot Settings → API Token → Revoke current token.</div>
+      </div>
+      <div class="row-2">
+        <div class="field-group">
+          <label>Chat ID</label>
+          <input type="text" id="chatId" placeholder="-1002460716147" oninput="saveSettings()">
+        </div>
+        <div class="field-group">
+          <label>Thread ID (топик)</label>
+          <input type="text" id="threadId" placeholder="849" oninput="saveSettings()">
+        </div>
+      </div>
+
+      <hr class="divider">
+      <button class="s-btn" onclick="testConnection()">
+        <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Тест соединения
+      </button>
+      <div class="status" id="testStatus">
+        <svg id="testIcon" viewBox="0 0 24 24"></svg>
+        <span id="testMsg"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="field-label">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Как получить Chat ID
+      </div>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.7">
+        Для личного чата или группы — перешли любое сообщение боту <a href="https://t.me/getmyid_bot" style="color:var(--blue)">@getmyid_bot</a>.<br>
+        Для канала или супергруппы ID начинается с <code>-100...</code><br>
+        Thread ID — это номер топика внутри группы-форума.
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ============== НАСТРОЙКИ (вводятся в UI, токен не хранится в коде) ==============
+  let SETTINGS = { token: '', chatId: '', threadId: '' };
+
+  let imageFile = null;
+  let tags = [];
+
+  function buildText() {
+    const date = document.getElementById('fDate').value.trim() || '__.__.____';
+    return `📊 РУБРИКА: «ОСТАТКИ ПО СЧЕТАМ»
+
+💰 Остатки на дату ${date}`;
+  }
+
+  // ============== UI: вкладки ==============
+  function switchTab(tab) {
+    document.getElementById('sec-compose').classList.toggle('visible', tab === 'compose');
+    document.getElementById('sec-settings').classList.toggle('visible', tab === 'settings');
+    document.getElementById('btn-compose').classList.toggle('active', tab === 'compose');
+    document.getElementById('btn-settings').classList.toggle('active', tab === 'settings');
+  }
+
+  // ============== Картинка ==============
+  function handleImg(input) {
+    const file = input.files[0];
+    if (!file) return;
+    setImage(file);
+  }
+
+  function setImage(file) {
+    imageFile = file;
+    const url = URL.createObjectURL(file);
+    const drop = document.getElementById('imgPreviewDrop');
+    drop.src = url;
+    drop.style.display = 'block';
+    document.getElementById('imgPlaceholder').style.display = 'none';
+    document.getElementById('imgDrop').classList.add('has-img');
+    document.getElementById('imgActions').classList.add('visible');
+    const pimg = document.getElementById('previewImg');
+    pimg.src = url;
+    pimg.style.display = 'block';
+    updatePreview();
+  }
+
+  function removeImg() {
+    imageFile = null;
+    document.getElementById('imgPreviewDrop').style.display = 'none';
+    document.getElementById('imgPreviewDrop').src = '';
+    document.getElementById('imgPlaceholder').style.display = 'flex';
+    document.getElementById('imgDrop').classList.remove('has-img');
+    document.getElementById('imgActions').classList.remove('visible');
+    document.getElementById('previewImg').style.display = 'none';
+    document.getElementById('previewImg').src = '';
+    document.getElementById('imgFile').value = '';
+    updatePreview();
+  }
+
+  document.addEventListener('paste', e => {
+    const items = e.clipboardData && e.clipboardData.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith('image/')) {
+        const file = items[i].getAsFile();
+        if (!file) continue;
+        setImage(file);
+        showStatus('statusBar', 'ok', 'Картинка вставлена из буфера обмена');
+        break;
+      }
+    }
+  });
+
+  const imgDrop = document.getElementById('imgDrop');
+  imgDrop.addEventListener('dragover', e => { e.preventDefault(); imgDrop.style.borderColor = 'var(--blue)'; });
+  imgDrop.addEventListener('dragleave', () => { imgDrop.style.borderColor = ''; });
+  imgDrop.addEventListener('drop', e => {
+    e.preventDefault(); imgDrop.style.borderColor = '';
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) setImage(file);
+  });
+
+  // ============== Теги ==============
+  function handleTagKey(e) {
+    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(e.target.value); }
+    else if (e.key === 'Backspace' && e.target.value === '' && tags.length) removeTag(tags.length - 1);
+  }
+  function handleTagInput(e) {
+    const v = e.target.value;
+    if (v.endsWith(',') || v.endsWith(' ')) addTag(v.slice(0, -1));
+  }
+  function addTag(val) {
+    val = val.trim().replace(/^@/, '');
+    if (!val) return;
+    tags.push(val);
+    renderTags(); updatePreview();
+    document.getElementById('tagInput').value = '';
+  }
+  function removeTag(i) {
+    tags.splice(i, 1);
+    renderTags(); updatePreview();
+  }
+  function renderTags() {
+    const wrap = document.getElementById('tagsWrap');
+    wrap.querySelectorAll('.tag-chip').forEach(el => el.remove());
+    const input = document.getElementById('tagInput');
+    tags.forEach((t, i) => {
+      const chip = document.createElement('div');
+      chip.className = 'tag-chip';
+      chip.innerHTML = `@${t}<button onclick="removeTag(${i})" title="Удалить">×</button>`;
+      wrap.insertBefore(chip, input);
+    });
+  }
+
+  // ============== Превью ==============
+  function updatePreview() {
+    const text = buildText();
+    document.getElementById('msgTextPreview').textContent = text;
+    const tagStr = tags.length ? '\n\n' + tags.map(t => '@' + t).join(' ') : '';
+    document.getElementById('previewText').textContent = text + tagStr;
+    const now = new Date();
+    document.getElementById('previewTime').textContent =
+      now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+  }
+
+  // ============== Настройки (localStorage, НЕ хардкод) ==============
+  function loadSettings() {
+    try {
+      const raw = localStorage.getItem('ostatki_tg_settings');
+      if (raw) {
+        SETTINGS = JSON.parse(raw);
+        document.getElementById('botToken').value = SETTINGS.token || '';
+        document.getElementById('chatId').value = SETTINGS.chatId || '';
+        document.getElementById('threadId').value = SETTINGS.threadId || '';
+        if (SETTINGS.token) document.getElementById('savedBadge').style.display = 'inline-flex';
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  function saveSettings() {
+    SETTINGS = {
+      token: document.getElementById('botToken').value.trim(),
+      chatId: document.getElementById('chatId').value.trim(),
+      threadId: document.getElementById('threadId').value.trim()
+    };
+    localStorage.setItem('ostatki_tg_settings', JSON.stringify(SETTINGS));
+    document.getElementById('savedBadge').style.display = SETTINGS.token ? 'inline-flex' : 'none';
+  }
+
+  function toggleTokenVisibility() {
+    const inp = document.getElementById('botToken');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+
+  // ============== Отправка ==============
+  async function sendMessage() {
+    if (!SETTINGS.token || !SETTINGS.chatId) {
+      showStatus('statusBar', 'err', 'Сначала заполните Bot Token и Chat ID во вкладке «Настройки».');
+      switchTab('settings');
+      return;
+    }
+    const tagStr = tags.length ? '\n\n' + tags.map(t => '@' + t).join(' ') : '';
+    const fullText = buildText() + tagStr;
+
+    const btn = document.getElementById('sendBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;animation:spin 0.8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Отправляю...';
+    showStatus('statusBar', 'info', 'Отправка в Telegram...');
+
+    try {
+      let result;
+      const threadId = SETTINGS.threadId ? parseInt(SETTINGS.threadId, 10) : null;
+
+      if (imageFile) {
+        const fd = new FormData();
+        fd.append('chat_id', SETTINGS.chatId);
+        if (threadId) fd.append('message_thread_id', threadId);
+        fd.append('photo', imageFile);
+        fd.append('caption', fullText);
+        const r = await fetch(`https://api.telegram.org/bot${SETTINGS.token}/sendPhoto`, { method: 'POST', body: fd });
+        result = await r.json();
+      } else {
+        const payload = { chat_id: SETTINGS.chatId, text: fullText };
+        if (threadId) payload.message_thread_id = threadId;
+        const r = await fetch(`https://api.telegram.org/bot${SETTINGS.token}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        result = await r.json();
+      }
+
+      if (result.ok) {
+        showStatus('statusBar', 'ok', '✅ Отправлено! Сообщение доставлено в чат.');
+        if (imageFile) removeImg();
+      } else {
+        showStatus('statusBar', 'err', 'Ошибка Telegram: ' + (result.description || 'неизвестная'));
+      }
+    } catch (e) {
+      showStatus('statusBar', 'err', 'Сетевая ошибка: ' + e.message);
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Отправить в Telegram';
+  }
+
+  async function testConnection() {
+    saveSettings();
+    if (!SETTINGS.token || !SETTINGS.chatId) {
+      showStatus('testStatus', 'err', 'Заполните Bot Token и Chat ID.');
+      return;
+    }
+    showStatus('testStatus', 'info', 'Отправляю тест...');
+    try {
+      const payload = { chat_id: SETTINGS.chatId, text: 'Тест соединения ✅' };
+      if (SETTINGS.threadId) payload.message_thread_id = parseInt(SETTINGS.threadId, 10);
+
+      const r = await fetch(`https://api.telegram.org/bot${SETTINGS.token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const d = await r.json();
+      if (d.ok) showStatus('testStatus', 'ok', 'Соединение работает! Сообщение доставлено.');
+      else showStatus('testStatus', 'err', 'Ошибка: ' + (d.description || 'неизвестная'));
+    } catch (e) {
+      showStatus('testStatus', 'err', 'Сетевая ошибка: ' + e.message);
+    }
+  }
+
+  function showStatus(id, type, msg) {
+    const el = document.getElementById(id);
+    el.className = 'status visible ' + type;
+    el.querySelector('span').textContent = msg;
+    const icon = el.querySelector('svg');
+    if (type === 'ok') icon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+    else if (type === 'err') icon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+    else icon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12.01" y2="16"/><line x1="12" y1="8" x2="12" y2="12"/>';
+  }
+
+  // ============== Инициализация ==============
+  // Значения по умолчанию для первого запуска (используются только если localStorage пуст).
+  // После первого сохранения данные хранятся в браузере, а не здесь.
+  const DEFAULT_SETTINGS = {
+    token: '8662623590:AAFnr_Mw01my43MNE3SoCgah0MZ4orMEa2Y',
+    chatId: '-4917547159',
+    threadId: ''
+  };
+
+  loadSettings();
+  if (!SETTINGS.token) {
+    SETTINGS = { ...DEFAULT_SETTINGS };
+    document.getElementById('botToken').value = SETTINGS.token;
+    document.getElementById('chatId').value = SETTINGS.chatId;
+    document.getElementById('threadId').value = SETTINGS.threadId;
+    saveSettings();
+  }
+  (function setTodayDate() {
+    const d = new Date();
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    document.getElementById('fDate').value = `${dd}.${mm}.${yyyy}`;
+  })();
+  updatePreview();
+</script>
+<style>
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+</body>
+</html>
