@@ -420,7 +420,8 @@
         <span class="saved-badge" id="savedBadge" style="display:none">сохранено в браузере</span>
       </div>
       <div class="settings-info">
-        Токен бота <b>не хранится в коде файла</b> — вводится здесь и сохраняется только в локальной памяти этого браузера (<code>localStorage</code>). Никому не передавайте этот файл с заполненными полями и не публикуйте его в репозитории.
+        Токен бота <b>не хранится в коде файла</b> — вводится здесь и сохраняется только в локальной памяти этого браузера (<code>localStorage</code>). Никому не передавайте этот файл с заполненными полями и не публикуйте его в репозитории.<br><br>
+        Сообщение всегда отправляется сразу в два чата: <code>-4917547159</code> и <code>-1002460716147</code> (топик 2). Адреса чатов зафиксированы в коде и не редактируются через интерфейс.
       </div>
 
       <div class="field-group">
@@ -433,46 +434,30 @@
         </div>
         <div class="field-hint">Если токен где-то "засветился" — перевыпустите его через @BotFather: /mybots → Bot Settings → API Token → Revoke current token.</div>
       </div>
-      <div class="row-2">
-        <div class="field-group">
-          <label>Chat ID</label>
-          <input type="text" id="chatId" placeholder="-1002460716147" oninput="saveSettings()">
-        </div>
-        <div class="field-group">
-          <label>Thread ID (топик)</label>
-          <input type="text" id="threadId" placeholder="849" oninput="saveSettings()">
-        </div>
-      </div>
 
       <hr class="divider">
       <button class="s-btn" onclick="testConnection()">
         <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        Тест соединения
+        Тест соединения (оба чата)
       </button>
       <div class="status" id="testStatus">
         <svg id="testIcon" viewBox="0 0 24 24"></svg>
         <span id="testMsg"></span>
       </div>
     </div>
-
-    <div class="card">
-      <div class="field-label">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        Как получить Chat ID
-      </div>
-      <p style="font-size:13px;color:var(--text-muted);line-height:1.7">
-        Для личного чата или группы — перешли любое сообщение боту <a href="https://t.me/getmyid_bot" style="color:var(--blue)">@getmyid_bot</a>.<br>
-        Для канала или супергруппы ID начинается с <code>-100...</code><br>
-        Thread ID — это номер топика внутри группы-форума.
-      </p>
-    </div>
   </div>
 
 </div>
 
 <script>
-  // ============== НАСТРОЙКИ (вводятся в UI, токен не хранится в коде) ==============
-  let SETTINGS = { token: '', chatId: '', threadId: '' };
+  // ============== НАСТРОЙКИ (вводится только токен, адреса чатов зафиксированы в коде) ==============
+  let SETTINGS = { token: '' };
+
+  // Сообщение всегда уходит в оба чата одним нажатием «Отправить».
+  const TARGET_CHATS = [
+    { chat_id: '-4917547159', thread_id: null },
+    { chat_id: '-1002460716147', thread_id: 2 }
+  ];
 
   let imageFile = null;
   let tags = [];
@@ -600,8 +585,6 @@
       if (raw) {
         SETTINGS = JSON.parse(raw);
         document.getElementById('botToken').value = SETTINGS.token || '';
-        document.getElementById('chatId').value = SETTINGS.chatId || '';
-        document.getElementById('threadId').value = SETTINGS.threadId || '';
         if (SETTINGS.token) document.getElementById('savedBadge').style.display = 'inline-flex';
       }
     } catch (e) { /* ignore */ }
@@ -609,9 +592,7 @@
 
   function saveSettings() {
     SETTINGS = {
-      token: document.getElementById('botToken').value.trim(),
-      chatId: document.getElementById('chatId').value.trim(),
-      threadId: document.getElementById('threadId').value.trim()
+      token: document.getElementById('botToken').value.trim()
     };
     localStorage.setItem('ostatki_tg_settings', JSON.stringify(SETTINGS));
     document.getElementById('savedBadge').style.display = SETTINGS.token ? 'inline-flex' : 'none';
@@ -622,10 +603,34 @@
     inp.type = inp.type === 'password' ? 'text' : 'password';
   }
 
-  // ============== Отправка ==============
+  // ============== Отправка (в оба чата сразу) ==============
+  async function sendToChat(target, fullText) {
+    const threadId = target.thread_id;
+    let result;
+    if (imageFile) {
+      const fd = new FormData();
+      fd.append('chat_id', target.chat_id);
+      if (threadId) fd.append('message_thread_id', threadId);
+      fd.append('photo', imageFile);
+      fd.append('caption', fullText);
+      const r = await fetch(`https://api.telegram.org/bot${SETTINGS.token}/sendPhoto`, { method: 'POST', body: fd });
+      result = await r.json();
+    } else {
+      const payload = { chat_id: target.chat_id, text: fullText };
+      if (threadId) payload.message_thread_id = threadId;
+      const r = await fetch(`https://api.telegram.org/bot${SETTINGS.token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      result = await r.json();
+    }
+    return result;
+  }
+
   async function sendMessage() {
-    if (!SETTINGS.token || !SETTINGS.chatId) {
-      showStatus('statusBar', 'err', 'Сначала заполните Bot Token и Chat ID во вкладке «Настройки».');
+    if (!SETTINGS.token) {
+      showStatus('statusBar', 'err', 'Сначала заполните Bot Token во вкладке «Настройки».');
       switchTab('settings');
       return;
     }
@@ -635,36 +640,31 @@
     const btn = document.getElementById('sendBtn');
     btn.disabled = true;
     btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;animation:spin 0.8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Отправляю...';
-    showStatus('statusBar', 'info', 'Отправка в Telegram...');
+    showStatus('statusBar', 'info', 'Отправка в Telegram (2 чата)...');
 
+    const results = [];
     try {
-      let result;
-      const threadId = SETTINGS.threadId ? parseInt(SETTINGS.threadId, 10) : null;
-
-      if (imageFile) {
-        const fd = new FormData();
-        fd.append('chat_id', SETTINGS.chatId);
-        if (threadId) fd.append('message_thread_id', threadId);
-        fd.append('photo', imageFile);
-        fd.append('caption', fullText);
-        const r = await fetch(`https://api.telegram.org/bot${SETTINGS.token}/sendPhoto`, { method: 'POST', body: fd });
-        result = await r.json();
-      } else {
-        const payload = { chat_id: SETTINGS.chatId, text: fullText };
-        if (threadId) payload.message_thread_id = threadId;
-        const r = await fetch(`https://api.telegram.org/bot${SETTINGS.token}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        result = await r.json();
+      for (const target of TARGET_CHATS) {
+        try {
+          const result = await sendToChat(target, fullText);
+          results.push({ target, result });
+        } catch (e) {
+          results.push({ target, result: { ok: false, description: e.message } });
+        }
       }
 
-      if (result.ok) {
-        showStatus('statusBar', 'ok', '✅ Отправлено! Сообщение доставлено в чат.');
+      const okCount = results.filter(r => r.result.ok).length;
+      if (okCount === results.length) {
+        showStatus('statusBar', 'ok', `✅ Отправлено в оба чата (${okCount}/${results.length}).`);
         if (imageFile) removeImg();
+      } else if (okCount > 0) {
+        const failed = results.filter(r => !r.result.ok)
+          .map(r => `${r.target.chat_id}: ${r.result.description || 'неизвестная ошибка'}`)
+          .join('; ');
+        showStatus('statusBar', 'err', `⚠️ Отправлено частично (${okCount}/${results.length}). Ошибки: ${failed}`);
       } else {
-        showStatus('statusBar', 'err', 'Ошибка Telegram: ' + (result.description || 'неизвестная'));
+        const failed = results.map(r => `${r.target.chat_id}: ${r.result.description || 'неизвестная ошибка'}`).join('; ');
+        showStatus('statusBar', 'err', 'Ошибка Telegram: ' + failed);
       }
     } catch (e) {
       showStatus('statusBar', 'err', 'Сетевая ошибка: ' + e.message);
@@ -676,23 +676,37 @@
 
   async function testConnection() {
     saveSettings();
-    if (!SETTINGS.token || !SETTINGS.chatId) {
-      showStatus('testStatus', 'err', 'Заполните Bot Token и Chat ID.');
+    if (!SETTINGS.token) {
+      showStatus('testStatus', 'err', 'Заполните Bot Token.');
       return;
     }
-    showStatus('testStatus', 'info', 'Отправляю тест...');
+    showStatus('testStatus', 'info', 'Отправляю тест в оба чата...');
     try {
-      const payload = { chat_id: SETTINGS.chatId, text: 'Тест соединения ✅' };
-      if (SETTINGS.threadId) payload.message_thread_id = parseInt(SETTINGS.threadId, 10);
-
-      const r = await fetch(`https://api.telegram.org/bot${SETTINGS.token}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const d = await r.json();
-      if (d.ok) showStatus('testStatus', 'ok', 'Соединение работает! Сообщение доставлено.');
-      else showStatus('testStatus', 'err', 'Ошибка: ' + (d.description || 'неизвестная'));
+      const results = [];
+      for (const target of TARGET_CHATS) {
+        try {
+          const payload = { chat_id: target.chat_id, text: 'Тест соединения ✅' };
+          if (target.thread_id) payload.message_thread_id = target.thread_id;
+          const r = await fetch(`https://api.telegram.org/bot${SETTINGS.token}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const d = await r.json();
+          results.push({ target, result: d });
+        } catch (e) {
+          results.push({ target, result: { ok: false, description: e.message } });
+        }
+      }
+      const okCount = results.filter(r => r.result.ok).length;
+      if (okCount === results.length) {
+        showStatus('testStatus', 'ok', `Соединение работает! Доставлено в оба чата (${okCount}/${results.length}).`);
+      } else {
+        const failed = results.filter(r => !r.result.ok)
+          .map(r => `${r.target.chat_id}: ${r.result.description || 'неизвестная ошибка'}`)
+          .join('; ');
+        showStatus('testStatus', 'err', `Доставлено ${okCount}/${results.length}. Ошибки: ${failed}`);
+      }
     } catch (e) {
       showStatus('testStatus', 'err', 'Сетевая ошибка: ' + e.message);
     }
@@ -709,20 +723,20 @@
   }
 
   // ============== Инициализация ==============
-  // Значения по умолчанию для первого запуска (используются только если localStorage пуст).
-  // После первого сохранения данные хранятся в браузере, а не здесь.
+  // Значение по умолчанию для первого запуска (используется только если localStorage пуст).
+  // После первого сохранения токен хранится в браузере, а не здесь.
   const DEFAULT_SETTINGS = {
-    token: '8662623590:AAFnr_Mw01my43MNE3SoCgah0MZ4orMEa2Y',
-    chatId: '-4917547159',
-    threadId: ''
+    token: '8662623590:AAFnr_Mw01my43MNE3SoCgah0MZ4orMEa2Y'
   };
+
+  // Теги, которые подставляются по умолчанию при каждой загрузке формы.
+  // Их можно удалить или дополнить как обычные теги перед отправкой.
+  const DEFAULT_TAGS = ['owarburg', 'Greedy Greedy'];
 
   loadSettings();
   if (!SETTINGS.token) {
     SETTINGS = { ...DEFAULT_SETTINGS };
     document.getElementById('botToken').value = SETTINGS.token;
-    document.getElementById('chatId').value = SETTINGS.chatId;
-    document.getElementById('threadId').value = SETTINGS.threadId;
     saveSettings();
   }
   (function setTodayDate() {
@@ -732,6 +746,7 @@
     const yyyy = d.getFullYear();
     document.getElementById('fDate').value = `${dd}.${mm}.${yyyy}`;
   })();
+  DEFAULT_TAGS.forEach(t => addTag(t));
   updatePreview();
 </script>
 <style>
